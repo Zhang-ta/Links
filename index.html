@@ -1,143 +1,570 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>死亡搁浅中端机界面</title>
+    <title>BRIDGES终端系统</title>
     <style>
+        /* 死亡搁浅UI核心样式 - 点线结构/全息蓝/倾斜透视 */
+        :root {
+            --hologram-blue: #00e1ff;
+            --hologram-dark: #00161c;
+            --warning: #ff2a6d;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Courier New', monospace;
         }
-
+        
         body {
-            background: #0a0a12;
-            color: #e0e0ff;
-            font-family: 'Orbitron', 'Arial Narrow', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: radial-gradient(circle at center, #001922, #00070c);
+            height: 100vh;
             overflow: hidden;
             position: relative;
         }
-
-        /* 全息背景效果 */
-        body::before {
+        
+        /* 点线边框 - 死亡搁浅UI标志性特征 */
+        .terminal {
+            width: 95vw;
+            height: 90vh;
+            margin: 5vh auto;
+            border: 1px solid var(--hologram-blue);
+            position: relative;
+            background-color: rgba(0, 22, 28, 0.7);
+            box-shadow: 0 0 30px rgba(0, 225, 255, 0.2);
+            transform: perspective(800px) rotateX(2deg); /* 3D透视效果 */
+            overflow: hidden;
+        }
+        
+        /* 点状装饰边框 */
+        .terminal::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(0, 80, 120, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(0, 120, 180, 0.1) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: -1;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 1px dashed var(--hologram-blue);
+            opacity: 0.6;
         }
-
+        
         /* 扫描线效果 */
-        .scanlines {
+        .scanline {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
+            height: 4px;
+            background: linear-gradient(
                 to bottom,
-                transparent 0%,
-                rgba(0, 150, 255, 0.05) 1px,
-                transparent 2px
+                rgba(0, 225, 255, 0.1),
+                rgba(0, 225, 255, 0.6),
+                rgba(0, 225, 255, 0.1)
             );
-            pointer-events: none;
-            z-index: 0;
+            animation: scan 4s linear infinite;
+            z-index: 10;
         }
-
-        /* 主容器 */
-        .terminal-container {
-            width: 90%;
-            max-width: 1200px;
-            height: 80vh;
-            background: rgba(10, 15, 25, 0.8);
-            border: 1px solid rgba(0, 150, 255, 0.3);
-            border-radius: 10px;
-            box-shadow: 
-                0 0 15px rgba(0, 100, 255, 0.3),
-                inset 0 0 20px rgba(0, 80, 150, 0.2);
-            position: relative;
-            overflow: hidden;
-            padding: 20px;
-            display: grid;
-            grid-template-rows: 80px 1fr 120px;
-            gap: 15px;
-        }
-
-        /* 头部区域 */
-        .terminal-header {
+        
+        /* 终端顶部状态栏 */
+        .status-bar {
+            height: 40px;
+            background: rgba(0, 30, 40, 0.8);
+            border-bottom: 1px solid var(--hologram-blue);
             display: flex;
-            justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+            position: relative;
         }
-
-        .logo {
-            font-size: 2rem;
-            font-weight: 700;
+        
+        .status-item {
+            margin-right: 30px;
+            font-size: 14px;
+            color: var(--hologram-blue);
+            text-shadow: 0 0 5px currentColor;
+        }
+        
+        .status-warning {
+            color: var(--warning);
+            animation: pulse 2s infinite;
+        }
+        
+        /* 主内容区 - 三栏布局 */
+        .main-content {
+            display: flex;
+            height: calc(100% - 90px);
+        }
+        
+        /* 左侧订单面板 */
+        .orders-panel {
+            width: 30%;
+            border-right: 1px solid rgba(0, 225, 255, 0.3);
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .panel-title {
+            color: var(--hologram-blue);
+            font-size: 18px;
+            margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 3px;
-            color: #00aaff;
-            text-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
         }
-
-        .status-indicators {
-            display: flex;
-            gap: 20px;
+        
+        .order-card {
+            background: rgba(0, 40, 50, 0.5);
+            border: 1px solid rgba(0, 225, 255, 0.3);
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-
-        .indicator {
+        
+        .order-card:hover {
+            border-color: var(--hologram-blue);
+            background: rgba(0, 60, 70, 0.7);
+        }
+        
+        .order-title {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .order-detail {
+            font-size: 13px;
+            color: var(--hologram-blue);
+            margin-bottom: 3px;
+        }
+        
+        /* 中部货物管理 */
+        .cargo-panel {
+            width: 40%;
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(0, 225, 255, 0.3);
+        }
+        
+        .cargo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .cargo-item {
+            aspect-ratio: 1;
+            background: rgba(0, 50, 60, 0.5);
+            border: 1px solid rgba(0, 225, 255, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.8rem;
+            justify-content: center;
+            padding: 5px;
+            transition: all 0.3s;
         }
-
-        .indicator-light {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: #00cc66;
-            box-shadow: 0 0 10px #00cc66;
+        
+        .cargo-item.critical {
+            border-color: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .cargo-icon {
+            font-size: 24px;
             margin-bottom: 5px;
+            color: var(--hologram-blue);
         }
-
-        .indicator-light.warning {
-            background: #ffaa00;
-            box-shadow: 0 0 10px #ffaa00;
+        
+        .cargo-name {
+            font-size: 10px;
+            color: white;
+            text-align: center;
         }
-
-        /* 主内容区域 */
-        .terminal-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 10px;
-            overflow: hidden;
+        
+        .cargo-weight {
+            font-size: 9px;
+            color: var(--hologram-blue);
         }
-
-        .panel {
-            background: rgba(5, 10, 20, 0.6);
-            border: 1px solid rgba(0, 150, 255, 0.2);
-            border-radius: 8px;
+        
+        /* 右侧地图面板 */
+        .map-panel {
+            width: 30%;
             padding: 15px;
-            box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3);
+            position: relative;
+        }
+        
+        .map-container {
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(45deg, #002a33, #001118);
+            border: 1px solid rgba(0, 225, 255, 0.3);
+            margin-bottom: 20px;
             position: relative;
             overflow: hidden;
         }
+        
+        .map-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--hologram-blue);
+            box-shadow: 0 0 10px currentColor;
+        }
+        
+        .map-node.connected::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid var(--hologram-blue);
+            animation: pulse 2s infinite;
+        }
+        
+        .node-label {
+            position: absolute;
+            font-size: 10px;
+            color: white;
+            left: 15px;
+            top: -5px;
+            text-shadow: 0 0 3px black;
+        }
+        
+        /* 连接线 */
+        .connection-line {
+            position: absolute;
+            height: 1px;
+            background: var(--hologram-blue);
+            transform-origin: left;
+            z-index: 1;
+        }
+        
+        /* 底部命令输入 */
+        .command-input {
+            height: 50px;
+            background: rgba(0, 30, 40, 0.8);
+            border-top: 1px solid var(--hologram-blue);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .prompt {
+            color: var(--hologram-blue);
+            margin-right: 10px;
+        }
+        
+        #command {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* 动画定义 */
+        @keyframes scan {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(calc(100vh - 10px)); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        /* 开罗尔网络特效 */
+        .chiral-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--hologram-blue);
+            border-radius: 50%;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="scanline"></div>
+        
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="status-item">UCA网络: <span class="status-warning">离线</span></div>
+            <div class="status-item">BB状态: <span>稳定</span></div>
+            <div class="status-item">开罗尔等级: <span>152ppm</span></div>
+            <div class="status-item">时间雨: <span class="status-warning">检测中</span></div>
+            <div class="status-item">BT活动: <span>低</span></div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧订单面板 -->
+            <div class="orders-panel">
+                <div class="panel-title">待处理订单</div>
+                
+                <div class="order-card">
+                    <div class="order-title">#114-紧急医疗补给</div>
+                    <div class="order-detail">收件人：首都结点城 医疗部</div>
+                    <div class="order-detail">距离：23.8km</div>
+                    <div class="order-detail">货物：健脑药x4</div>
+                    <div class="order-detail">状态：<span class="status-warning">紧急</span></div>
+                </div>
+                
+                <div class="order-card">
+                    <div class="order-title">#072-稀有金属运输</div>
+                    <div class="order-detail">收件人：沿湖结点城 工程部</div>
+                    <div class="order-detail">距离：18.2km</div>
+                    <div class="order-detail">货物：开罗尔晶体x12</div>
+                    <div class="order-detail">状态：中等优先级</div>
+                </div>
+                
+                <div class="order-card">
+                    <div class="order-title">#091-总统遗体运输</div>
+                    <div class="order-detail">收件人：首都结点城西焚化场</div>
+                    <div class="order-detail">距离：9.8km</div>
+                    <div class="order-detail">货物：特殊容器x1</div>
+                    <div class="order-detail">状态：机密运输</div>
+                </div>
+            </div>
+            
+            <!-- 中部货物管理 -->
+            <div class="cargo-panel">
+                <div class="panel-title">货物管理</div>
+                
+                <div class="cargo-grid">
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🧪</div>
+                        <div class="cargo-name">健脑药</div>
+                        <div class="cargo-weight">0.8kg</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🧪</div>
+                        <div class="cargo-name">健脑药</div>
+                        <div class="cargo-weight">0.8kg</div>
+                    </div>
+                    <div class="cargo-item critical">
+                        <div class="cargo-icon">💉</div>
+                        <div class="cargo-name">血袋</div>
+                        <div class="cargo-weight">1.2kg</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🧊</div>
+                        <div class="cargo-name">开罗尔晶体</div>
+                        <div class="cargo-weight">4.5kg</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">📦</div>
+                        <div class="cargo-name">袋装口粮</div>
+                        <div class="cargo-weight">1.5kg</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">💧</div>
+                        <div class="cargo-name">活水</div>
+                        <div class="cargo-weight">2.0kg</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🧱</div>
+                        <div class="cargo-name">建筑材料</div>
+                        <div class="cargo-weight">8.0kg</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🦿</div>
+                        <div class="cargo-name">机械腿</div>
+                        <div class="cargo-weight">3.2kg</div>
+                    </div>
+                </div>
+                
+                <div class="panel-title" style="margin-top: 20px;">装备状态</div>
+                <div class="cargo-grid">
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🦾</div>
+                        <div class="cargo-name">力量骨架</div>
+                        <div class="cargo-weight">68%</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🔋</div>
+                        <div class="cargo-name">备用电池</div>
+                        <div class="cargo-weight">2/2</div>
+                    </div>
+                    <div class="cargo-item">
+                        <div class="cargo-icon">🧪</div>
+                        <div class="cargo-name">手榴弹</div>
+                        <div class="cargo-weight">4/8</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧地图面板 -->
+            <div class="map-panel">
+                <div class="panel-title">开罗尔网络覆盖</div>
+                <div class="map-container">
+                    <!-- 地图节点由JS动态生成 -->
+                </div>
+                
+                <div class="panel-title">网络连接状态</div>
+                <div class="status-warning">警告：开罗尔网络中断</div>
+                <div class="order-detail">建议前往最近结点：首都结点城(9.8km)</div>
+                
+                <div class="panel-title" style="margin-top: 15px;">终端指令</div>
+                <div class="order-detail">connect [结点名称] - 建立网络连接</div>
+                <div class="order-detail">scan - 扫描区域开罗尔浓度</div>
+                <div class="order-detail">orders - 刷新订单列表</div>
+            </div>
+        </div>
+        
+        <!-- 命令输入 -->
+        <div class="command-input">
+            <div class="prompt">SAM> </div>
+            <input type="text" id="command" placeholder="输入终端指令...">
+        </div>
+    </div>
 
-        .panel-title {
-            color: #00aaff;
-            font-size: 1.2rem;
-            margin-bottom:
+    <script>
+        // 创建开罗尔粒子特效
+        function createChiralParticles() {
+            const terminal = document.querySelector('.terminal');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('chiral-particle');
+                
+                // 随机位置
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                
+                // 随机动画参数
+                const duration = 3 + Math.random() * 7;
+                const delay = Math.random() * 5;
+                const size = 0.5 + Math.random() * 3;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.animation = `pulse ${duration}s ${delay}s infinite`;
+                
+                terminal.appendChild(particle);
+            }
+        }
+        
+        // 生成地图节点和连接
+        function generateMap() {
+            const mapContainer = document.querySelector('.map-container');
+            
+            // 清除现有内容
+            mapContainer.innerHTML = '';
+            
+            // 定义结点位置
+            const nodes = [
+                { name: "SAM", x: 50, y: 80, connected: false },
+                { name: "首都结点城", x: 20, y: 20, connected: true },
+                { name: "风电厂", x: 40, y: 40, connected: false },
+                { name: "沿湖结点城", x: 70, y: 30, connected: false },
+                { name: "气象站", x: 85, y: 60, connected: false }
+            ];
+            
+            // 创建连接线
+            const connectionLine = document.createElement('div');
+            connectionLine.classList.add('connection-line');
+            connectionLine.style.width = "0%";
+            connectionLine.style.left = "50%";
+            connectionLine.style.top = "80%";
+            connectionLine.style.transform = "rotate(-25deg)";
+            mapContainer.appendChild(connectionLine);
+            
+            // 动画连接线
+            setTimeout(() => {
+                connectionLine.style.width = "25%";
+                connectionLine.style.transition = "width 2s ease";
+            }, 500);
+            
+            // 创建结点
+            nodes.forEach(node => {
+                const nodeElement = document.createElement('div');
+                nodeElement.classList.add('map-node');
+                if (node.connected) nodeElement.classList.add('connected');
+                
+                nodeElement.style.left = `${node.x}%`;
+                nodeElement.style.top = `${node.y}%`;
+                
+                const label = document.createElement('div');
+                label.classList.add('node-label');
+                label.textContent = node.name;
+                nodeElement.appendChild(label);
+                
+                mapContainer.appendChild(nodeElement);
+            });
+        }
+        
+        // 终端命令处理
+        function setupCommandHandler() {
+            const commandInput = document.getElementById('command');
+            
+            commandInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const command = commandInput.value.trim().toLowerCase();
+                    commandInput.value = '';
+                    
+                    // 处理命令
+                    switch(command) {
+                        case 'connect':
+                            document.querySelector('.status-bar .status-warning').textContent = '连接中...';
+                            setTimeout(() => {
+                                document.querySelector('.status-bar .status-warning').textContent = '在线';
+                                document.querySelector('.status-bar .status-warning').style.color = '#00e1ff';
+                                document.querySelector('.map-panel .status-warning').textContent = '已连接：首都结点城';
+                            }, 2000);
+                            break;
+                        case 'scan':
+                            document.querySelector('.status-item:nth-child(4) span').innerHTML = '<span class="status-warning">时间雨预测：15分钟内</span>';
+                            break;
+                        case 'orders':
+                            // 模拟刷新订单
+                            const orderCards = document.querySelectorAll('.order-card');
+                            orderCards[0].style.opacity = '0.5';
+                            setTimeout(() => {
+                                orderCards[0].style.opacity = '1';
+                            }, 1000);
+                            break;
+                        case '':
+                            // 空命令不处理
+                            break;
+                        default:
+                            // 无效命令
+                            alert(`未知命令: ${command}\n可用命令: connect, scan, orders`);
+                    }
+                }
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            createChiralParticles();
+            generateMap();
+            setupCommandHandler();
+            
+            // 设置货物点击效果
+            document.querySelectorAll('.cargo-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    // 移除之前选中的高亮
+                    document.querySelectorAll('.cargo-item').forEach(i => {
+                        i.style.border = '1px solid rgba(0, 225, 255, 0.3)';
+                    });
+                    
+                    // 添加当前选中高亮
+                    item.style.border = '2px solid var(--hologram-blue)';
+                    item.style.boxShadow = '0 0 10px var(--hologram-blue)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
